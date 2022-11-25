@@ -1,6 +1,20 @@
 # Dart Net Work
 
 - [Flutter version 3.3.8](https://docs.flutter.dev/development/tools/sdk/releases?tab=linux)
+-
+
+## Dependencies
+
+```yaml
+dependencies:
+  flutter:
+    sdk: flutter
+
+  retrofit: ^3.0.1
+  logger: any
+  dio: ^4.0.6
+  connectivity_plus: ^3.0.2
+```
 
 ## Getting Started
 
