@@ -17,9 +17,10 @@ dart_net_work:
   path: ./submodules/dart_net_work
 ```
 
-- Custom ClientRequest example
+- Custom ClientRequestHandler example
 
 ```dart
+
 class ApplicationResponse {
   bool unexpectedError;
   bool isInternetConnected;
@@ -40,14 +41,15 @@ class ApplicationResponse {
   });
 }
 
-class ClientRequestImpl extends ClientRequest {
+@injectable
+class ClientRequestHandlerImpl extends ClientRequestHandler {
   final I18n i18n;
 
-  ClientRequestImpl(this.i18n);
+  ClientRequestHandlerImpl(this.i18n);
 
   @override
   void unexpectedError(OnRequestError onRequestError) async {
-    var isInternetConnected = await NetworkInfo.isInternetConnection();
+    var isInternetConnected = await NetworkInfo.hasInternetConnection();
     var message = isInternetConnected
         ? i18n.could_not_complete_the_request
         : i18n.verify_the_internet_connection;
@@ -76,5 +78,79 @@ class ClientRequestImpl extends ClientRequest {
       unexpectedError(onRequestError);
     }
   }
+}
+```
+
+- Implementing client request
+
+```dart
+@Singleton(as: ClientProvider)
+class ClientProviderImpl extends ClientProvider {
+  final AuthorizationRepository _authorizationRepository;
+
+  ClientProviderImpl(this._authorizationRepository, ApiDomain apiDomain)
+      : super(apiDomain);
+
+  @override
+  Future<String?> authorizationHeader() async {
+    return await _authorizationRepository.authorization();
+  }
+}
+
+import 'package:json_annotation/json_annotation.dart';
+
+part 'authorization_response.g.dart';
+
+@JsonSerializable()
+class AuthorizationResponse {
+  int code;
+  bool success;
+  String message;
+  String jwt;
+  int timestamp;
+
+  AuthorizationResponse({
+    required this.code,
+    required this.success,
+    required this.message,
+    required this.jwt,
+    required this.timestamp,
+  });
+
+  factory AuthorizationResponse.fromJson(Map<String, dynamic> json) =>
+      _$AuthorizationResponseFromJson(json);
+
+  Map<String, dynamic> toJson() => _$AuthorizationResponseToJson(this);
+}
+
+
+part 'login_client.g.dart';
+
+@RestApi()
+abstract class _LoginClient {
+  @POST("/authorization")
+  Future<HttpResponse<AuthorizationResponse>> __requestAuthorization(
+      @Body() AuthorizationRequest userAuthorization);
+}
+
+@injectable
+class LoginClient extends __LoginClient {
+  late final ClientRequestHandler _clientRequest;
+
+  LoginClient(ClientRequestHandler clientRequest, ClientProvider clientProvider)
+      : super(clientProvider.provider) {
+    _clientRequest = clientRequest;
+  }
+
+  requestAuthorization({
+    required AuthorizationRequest request,
+    required OnRequestSuccess<AuthorizationResponse> onRequestSuccess,
+    required OnRequestError onRequestError,
+  }) =>
+      _clientRequest.request(
+            () => __requestAuthorization(request),
+        onRequestSuccess,
+        onRequestError,
+      );
 }
 ```
