@@ -81,22 +81,28 @@ class ClientRequestHandlerImpl extends ClientRequestHandler {
 }
 ```
 
-- Implementing client request
+- Implementing client provider
 
 ```dart
-@Singleton(as: ClientProvider)
-class ClientProviderImpl extends ClientProvider {
-  final AuthorizationRepository _authorizationRepository;
-
-  ClientProviderImpl(this._authorizationRepository, ApiDomain apiDomain)
-      : super(apiDomain);
+@injectable
+class ApiDomainImpl extends ApiDomain {
+  static const String baseLocalHost = "http://localhost";
 
   @override
-  Future<String?> authorizationHeader() async {
-    return await _authorizationRepository.authorization();
-  }
+  String get baseApiUrl => "$baseLocalHost:8080/api/v1/";
 }
 
+@Singleton(as: ClientProvider)
+class ClientProviderImpl extends ClientProvider {
+
+  ClientProviderImpl(ApiDomain apiDomain)
+      : super(apiDomain);
+}
+```
+
+- Authorization model example
+
+```dart
 import 'package:json_annotation/json_annotation.dart';
 
 part 'authorization_response.g.dart';
@@ -122,7 +128,11 @@ class AuthorizationResponse {
 
   Map<String, dynamic> toJson() => _$AuthorizationResponseToJson(this);
 }
+```
 
+- Login client example
+
+```dart
 
 part 'login_client.g.dart';
 
