@@ -20,7 +20,7 @@ dart_net_work:
 - Custom ClientRequestHandler example
 
 ```dart
-
+@JsonSerializable()
 class ApplicationResponse {
   bool unexpectedError;
   bool isInternetConnected;
