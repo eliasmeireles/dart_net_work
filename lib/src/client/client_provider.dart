@@ -1,6 +1,5 @@
-import 'package:dio/dio.dart';
 import 'package:dart_net_work/dart_net_work.dart';
-
+import 'package:dio/dio.dart';
 
 class ClientProvider {
   final authorization = 'Authorization';
@@ -10,33 +9,30 @@ class ClientProvider {
 
   String get baseUrl => apiDomain.baseApiUrl;
 
-  Dio get provider =>
-      Dio()
-        ..interceptors.add(
-          InterceptorsWrapper(
-              onRequest: requestInterceptor,
-              onResponse: responseInterceptor,
-              onError: _onError),
-        )
-        ..options.baseUrl = baseUrl
-        ..options.connectTimeout = 10000;
+  Dio get provider => Dio()
+    ..interceptors.add(
+      InterceptorsWrapper(
+          onRequest: requestInterceptor,
+          onResponse: responseInterceptor,
+          onError: _onError),
+    )
+    ..options.baseUrl = baseUrl
+    ..options.connectTimeout = 10000;
 
   void _onError(DioError error, ErrorInterceptorHandler handler) async {
     var logData = error.response != null
-        ? "${error.response?.requestOptions.method.toUpperCase()}(${error
-        .response?.statusCode})"
-        " ==> ${error.response?.realUri}\n${error.response?.data.toString()}"
+        ? "${error.response?.requestOptions.method.toUpperCase()}(${error.response?.statusCode})"
+            " ==> ${error.response?.realUri}\n${error.response?.data.toString()}"
         : error.message;
 
     logData.errorLog();
     handler.next(error);
   }
 
-  responseInterceptor(Response response,
-      ResponseInterceptorHandler handler) async {
+  responseInterceptor(
+      Response response, ResponseInterceptorHandler handler) async {
     var logData =
-        "${response.requestOptions.method.toUpperCase()}(${response
-        .statusCode}) ==> ${response.realUri}";
+        "${response.requestOptions.method.toUpperCase()}(${response.statusCode}) ==> ${response.realUri}";
 
     if (!response.headers.isEmpty) {
       logData += "\nHeaders: {";
@@ -55,8 +51,8 @@ class ClientProvider {
     handler.next(response);
   }
 
-  requestInterceptor(RequestOptions options,
-      RequestInterceptorHandler handler) async {
+  requestInterceptor(
+      RequestOptions options, RequestInterceptorHandler handler) async {
     var logData = "${options.method.toUpperCase()} ==> ${options.uri}";
 
     addAuthorization(options);
