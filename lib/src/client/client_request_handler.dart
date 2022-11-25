@@ -5,7 +5,7 @@ typedef ServiceRequest = Future<HttpResponse<dynamic>> Function();
 typedef OnRequestSuccess<T> = Function(T);
 typedef OnRequestError = Function(dynamic);
 
-abstract class ClientRequest {
+abstract class ClientRequestHandler {
   Future request<T>(
     ServiceRequest serviceRequest,
     OnRequestSuccess<T> onRequestSuccess,
