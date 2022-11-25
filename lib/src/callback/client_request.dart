@@ -1,16 +1,15 @@
-import 'package:dio/dio.dart';
 import 'package:dart_net_work/dart_net_work.dart';
+import 'package:dio/dio.dart';
 
-
-typedef ServiceRequest<T> = Future<HttpResponse<T>> Function();
+typedef ServiceRequest = Future<HttpResponse<dynamic>> Function();
 typedef OnRequestSuccess<T> = Function(T);
-typedef OnRequestError<T> = Function(T);
+typedef OnRequestError = Function(dynamic);
 
 abstract class ClientRequest {
   Future request<T>(
-    ServiceRequest<T> serviceRequest,
+    ServiceRequest serviceRequest,
     OnRequestSuccess<T> onRequestSuccess,
-    OnRequestError<T> onRequestError,
+    OnRequestError onRequestError,
   ) async {
     serviceRequest.call().then((response) {
       onRequestSuccess(response.data);
@@ -18,27 +17,31 @@ abstract class ClientRequest {
         (errorResponse) => errorRequestHandler(errorResponse, onRequestError));
   }
 
-  errorRequestHandler<T>(
+  errorRequestHandler(
     dynamic errorResponse,
-    OnRequestError<T> onRequestError,
+    OnRequestError onRequestError,
   ) {
     Response? response = errorResponse.response;
     if (response != null && errorResponse is DioError) {
-      handlerApplicationResponse(response, onRequestError);
+      responseHandler(response, onRequestError);
     } else {
       unexpectedError(onRequestError);
     }
   }
 
-  void onError<T>(dynamic error, OnRequestError<T> onRequestError) {
+  void onError(dynamic error, OnRequestError onRequestError) {
     unexpectedError(onRequestError);
     errorLog(error);
   }
 
-  void unexpectedError<T>(OnRequestError<T> onRequestError);
+  void unexpectedError(OnRequestError onRequestError) {
+    onRequestError('Request failed!');
+  }
 
-  void handlerApplicationResponse<T>(
+  void responseHandler(
     Response<dynamic> response,
-    OnRequestError<T> onRequestError,
-  );
+    OnRequestError onRequestError,
+  ) {
+    onRequestError(response.data);
+  }
 }
