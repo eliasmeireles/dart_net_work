@@ -17,7 +17,7 @@ class ClientProvider {
           onError: _onError),
     )
     ..options.baseUrl = baseUrl
-    ..options.connectTimeout = 10000;
+    ..options.connectTimeout = Duration(minutes: Duration.millisecondsPerSecond);
 
   void _onError(DioError error, ErrorInterceptorHandler handler) async {
     var logData = error.response != null
@@ -25,7 +25,7 @@ class ClientProvider {
             " ==> ${error.response?.realUri}\n${error.response?.data.toString()}"
         : error.message;
 
-    logData.errorLog();
+    logData?.errorLog();
     handler.next(error);
   }
 
