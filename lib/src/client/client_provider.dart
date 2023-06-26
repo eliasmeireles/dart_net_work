@@ -36,6 +36,9 @@ class ClientProvider {
 
     logData?.errorLog();
     handler.next(error);
+    if(error.response != null) {
+      clientErrorResponseHandler?.errorHandler(error.response!);
+    }
   }
 
   responseInterceptor(
