@@ -1,11 +1,20 @@
 import 'package:dart_net_work/dart_net_work.dart';
 import 'package:dio/dio.dart';
+import 'package:get_it/get_it.dart';
+
 
 class ClientProvider {
   final authorization = 'Authorization';
   final ApiDomain apiDomain;
+  ClientErrorResponseHandler? clientErrorResponseHandler;
 
-  ClientProvider(this.apiDomain);
+  ClientProvider(this.apiDomain) {
+    try {
+      clientErrorResponseHandler = GetIt.instance.get<ClientErrorResponseHandler>();
+    } catch(ignore) {
+      clientErrorResponseHandler = null;
+    }
+  }
 
   String get baseUrl => apiDomain.baseApiUrl;
 
@@ -19,7 +28,7 @@ class ClientProvider {
     ..options.baseUrl = baseUrl
     ..options.connectTimeout = Duration(minutes: Duration.millisecondsPerSecond);
 
-  void _onError(DioError error, ErrorInterceptorHandler handler) async {
+  void _onError(DioException error, ErrorInterceptorHandler handler) async {
     var logData = error.response != null
         ? "${error.response?.requestOptions.method.toUpperCase()}(${error.response?.statusCode})"
             " ==> ${error.response?.realUri}\n${error.response?.data.toString()}"
@@ -47,6 +56,7 @@ class ClientProvider {
       logData.debugLog();
     } else {
       logData.errorLog();
+      clientErrorResponseHandler?.errorHandler(response);
     }
     handler.next(response);
   }

@@ -12,6 +12,7 @@ dependencies:
   flutter:
     sdk: flutter
 
+  get_it: ^7.6.0
   retrofit: ^4.0.1
   logger: any
   dio: ^5.2.1+1
