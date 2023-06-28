@@ -21,11 +21,16 @@ abstract class ClientRequestHandler {
     dynamic errorResponse,
     OnRequestError onRequestError,
   ) {
-    Response? response = errorResponse.response;
-    if (response != null && errorResponse is DioError) {
-      responseHandler(response, onRequestError);
-    } else {
-      unexpectedError(onRequestError);
+    try {
+      Response? response = errorResponse.response;
+      if (response != null && errorResponse is DioException) {
+        onRequestError(response.data);
+      } else {
+        unexpectedError(onRequestError);
+      }
+    } catch (error) {
+      errorLog(error);
+      onRequestError(error);
     }
   }
 
@@ -36,12 +41,5 @@ abstract class ClientRequestHandler {
 
   void unexpectedError(OnRequestError onRequestError) {
     onRequestError('Request failed!');
-  }
-
-  void responseHandler(
-    Response<dynamic> response,
-    OnRequestError onRequestError,
-  ) {
-    onRequestError(response.data);
   }
 }
